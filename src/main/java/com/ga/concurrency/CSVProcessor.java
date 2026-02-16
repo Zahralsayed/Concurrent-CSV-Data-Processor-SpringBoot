@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -23,6 +24,36 @@ public class CSVProcessor {
     private final ExecutorService executor = Executors.newFixedThreadPool(5);
     private final Lock lock = new ReentrantLock();
     private final Semaphore semaphore = new Semaphore(3);
+    private final AtomicInteger processedCount = new AtomicInteger(0);
+
+
+    private void processEmployee(Employee employee) {
+        try {
+            semaphore.acquire();
+
+            double increment = calculateIncrement(employee);
+
+            if (increment > 0) {
+                lock.lock();
+                try {
+                    employee.applySalaryIncrease(increment);
+                } finally {
+                    lock.unlock();
+                }
+            }
+
+            processedCount.incrementAndGet();
+
+            System.out.println(Thread.currentThread().getName()
+                    + " processed " + employee.getName()
+                    + " | New Salary: " + employee.getSalary());
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            semaphore.release();
+        }
+    }
 
     private List<Employee> readCSV(String filePath) throws IOException {
         return Files.lines(Paths.get(filePath))
