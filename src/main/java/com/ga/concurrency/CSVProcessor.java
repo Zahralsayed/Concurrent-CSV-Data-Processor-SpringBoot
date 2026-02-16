@@ -27,6 +27,21 @@ public class CSVProcessor {
     private final AtomicInteger processedCount = new AtomicInteger(0);
 
 
+    public List<Employee> processAndReturnEmployees(String filePath) throws IOException, InterruptedException {
+
+        List<Employee> employees = readCSV(filePath);
+
+        for (Employee employee : employees) {
+            executor.submit(() -> processEmployee(employee));
+        }
+
+        executor.shutdown();
+        executor.awaitTermination(2, TimeUnit.MINUTES);
+
+        System.out.println("Total employees processed: " + processedCount.get());
+        return employees;
+    }
+
     private void processEmployee(Employee employee) {
         try {
             semaphore.acquire();
