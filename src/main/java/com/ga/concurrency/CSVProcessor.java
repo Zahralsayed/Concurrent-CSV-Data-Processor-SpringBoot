@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,12 +28,42 @@ public class CSVProcessor {
         String[] parts = line.split(",");
 
         return new Employee(
+                Long.parseLong(parts[0]),
                 parts[1],
                 Double.parseDouble(parts[2]),
                 LocalDate.parse(parts[3]),
                 Role.valueOf(parts[4].toUpperCase()),
                 Double.parseDouble(parts[5])
         );
+    }
+
+    private double calculateIncrement(Employee employee) {
+
+        if (employee.getProjectCompletionPercentage() < 0.6) {
+            return 0;
+        }
+
+        long yearsWorked = ChronoUnit.YEARS.between(
+                employee.getJoinedDate(),
+                LocalDate.now()
+        );
+
+        if (yearsWorked < 1) {
+            return 0;
+        }
+
+        double yearIncrease = yearsWorked * 0.02;
+        double roleIncrease = getRoleIncrease(employee.getRole());
+
+        return yearIncrease + roleIncrease;
+    }
+
+    private double getRoleIncrease(Role role) {
+        return switch (role) {
+            case DIRECTOR -> 0.05;
+            case MANAGER -> 0.02;
+            case EMPLOYEE -> 0.01;
+        };
     }
 
 }
