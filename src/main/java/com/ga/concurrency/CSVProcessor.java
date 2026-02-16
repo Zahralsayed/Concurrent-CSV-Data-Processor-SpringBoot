@@ -20,6 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class CSVProcessor {
 
     private final ExecutorService executor = Executors.newFixedThreadPool(5);
+    private final Lock lock = new ReentrantLock();
 
     private List<Employee> readCSV(String filePath) throws IOException {
         return Files.lines(Paths.get(filePath))
