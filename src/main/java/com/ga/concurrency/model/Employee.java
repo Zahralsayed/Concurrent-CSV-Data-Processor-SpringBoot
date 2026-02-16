@@ -8,4 +8,12 @@ public class Employee {
     private LocalDate joinedDate;
     private Role role;
     private double projectCompletionPercentage;
+
+    public Employee(String name, double salary, LocalDate joinedDate, Role role, double projectCompletionPercentage) {
+        this.name = name;
+        this.salary = salary;
+        this.joinedDate = joinedDate;
+        this.role = role;
+        this.projectCompletionPercentage = projectCompletionPercentage;
+    }
 }
